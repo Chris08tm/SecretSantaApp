@@ -6,6 +6,7 @@ import com.ccs.secretsantaapp.Service.SecretSantaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -19,7 +20,8 @@ public class SecretSantaController {
     private EmailSenderService emailSenderService;
 
     @PostMapping
-    public String submitParticipants(@RequestBody List<ParticipantModel> participants) {
+    public String submitParticipants(@RequestBody ArrayList<ParticipantModel> participants) {
+        //secretSantaService.generatePairs(participants);
         emailSenderService.sendEmails(secretSantaService.generatePairs(participants));
         return "Emails have been sent";
     }
