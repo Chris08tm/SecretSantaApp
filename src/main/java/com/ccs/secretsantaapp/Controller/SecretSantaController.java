@@ -1,7 +1,6 @@
 package com.ccs.secretsantaapp.Controller;
 
 import com.ccs.secretsantaapp.Model.ParticipantModel;
-import com.ccs.secretsantaapp.Service.EmailSenderService;
 import com.ccs.secretsantaapp.Service.SecretSantaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -16,13 +15,36 @@ public class SecretSantaController {
     @Autowired
     private SecretSantaService secretSantaService;
 
-    @Autowired
-    private EmailSenderService emailSenderService;
-
     @PostMapping
-    public String submitParticipants(@RequestBody ArrayList<ParticipantModel> participants) {
-        //secretSantaService.generatePairs(participants);
-        emailSenderService.sendEmails(secretSantaService.generatePairs(participants));
-        return "Emails have been sent";
+    public ParticipantModel saveParticipant(@RequestBody ParticipantModel participantModel){
+        return secretSantaService.saveParticipant(participantModel);
     }
+
+    @PostMapping("/participants")
+    public List<ParticipantModel> saveParticipants(@RequestBody List<ParticipantModel> participants){
+        return secretSantaService.saveParticipants(participants);
+    }
+
+    @PutMapping("/{email}")
+    public ParticipantModel updateParticipant(@PathVariable String email,
+                                              @RequestBody ParticipantModel p){
+        return secretSantaService.updateParticipant(email, p);
+    }
+
+    @GetMapping
+    public List<ParticipantModel> findAllParticipants(){
+        return secretSantaService.findAllParticipants();
+    }
+
+    @GetMapping("/{email}")
+    public ParticipantModel findParticipantByEmail(@PathVariable String email){
+        return secretSantaService.findParticipantByEmail(email);
+    }
+
+    @GetMapping("/pairs")
+    public void sendEmails(){
+        ArrayList<ParticipantModel> participants = new ArrayList<>(findAllParticipants());
+        secretSantaService.generatePairsAndSendEmails(participants);
+    }
+
 }

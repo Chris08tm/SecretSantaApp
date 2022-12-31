@@ -1,45 +1,68 @@
 package com.ccs.secretsantaapp.Service;
 
 import com.ccs.secretsantaapp.Model.ParticipantModel;
+import com.ccs.secretsantaapp.Repository.SecretSantaRepositoryInterface;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Objects;
+
 
 @Service
 public class SecretSantaService {
+    @Autowired
+    private PairGeneratorService pairGeneratorService;
 
-    public HashMap<ParticipantModel, ParticipantModel> generatePairs(ArrayList<ParticipantModel> participants) {
-        HashMap<ParticipantModel, ParticipantModel> pairs = new HashMap<>();
+    @Autowired
+    private EmailSenderService emailSenderService;
 
-        for(int i = 0; i < participants.size(); i++){
-            Random rand = new Random();
-            int randomSpot = rand.nextInt(participants.size());
-            swap(participants, i, randomSpot);
+    @Autowired
+    private SecretSantaRepositoryInterface secretSantaRepositoryInterface;
+
+    public void generatePairsAndSendEmails(ArrayList<ParticipantModel> participants){
+        if(participants.size() <= 1){
+            System.out.println("Not enough participants");
+            return;
         }
-
-        for(int i = 0; i < participants.size(); i++){
-            if(i == participants.size() - 1){
-                pairs.put(participants.get(i) , participants.get(0));
-            }else{
-                pairs.put(participants.get(i), participants.get(i+1));
-            }
-
-        }
-
-        printPairs(pairs);
-        return pairs;
+        HashMap<ParticipantModel, ParticipantModel> p = pairGeneratorService.generatePairs(participants);
+        // emailSenderService.sendEmails(p);
     }
 
-    private void swap(ArrayList<ParticipantModel> receivers, int x, int y){
-        ParticipantModel temp = receivers.get(x);
-        receivers.set(x , receivers.get(y));
-        receivers.set(y, temp);
+    public List<ParticipantModel> saveParticipants(List<ParticipantModel> participants){
+        return secretSantaRepositoryInterface.saveAll(participants);
     }
 
-    private void printPairs(HashMap<ParticipantModel, ParticipantModel> pairs){
-        for(Map.Entry<ParticipantModel, ParticipantModel> entry : pairs.entrySet()){
-            System.out.println(entry.getKey().getName() + " -> " + entry.getValue().getName());
+    public ParticipantModel saveParticipant(ParticipantModel participantModel){
+        return secretSantaRepositoryInterface.save(participantModel);
+    }
+
+
+    public ParticipantModel findParticipantByEmail(String email) {
+        return secretSantaRepositoryInterface.findByEmail(email);
+    }
+
+    public List<ParticipantModel> findAllParticipants() {
+        return secretSantaRepositoryInterface.findAll();
+    }
+
+    public ParticipantModel updateParticipant(String email, ParticipantModel p) {
+        ParticipantModel participantModel = findParticipantByEmail(email);
+
+        if(Objects.nonNull(p.getName()) && !"".equalsIgnoreCase(p.getName())){
+            participantModel.setName(p.getName());
         }
-    }
+        if(Objects.nonNull(p.getEmail()) && !"".equalsIgnoreCase(p.getEmail())){
+            participantModel.setEmail(p.getEmail());
+        }
+        if(Objects.nonNull(p.getWishList()) && !"".equalsIgnoreCase(p.getWishList())){
+            participantModel.setWishList(p.getWishList());
+        }
 
+        // Send email about update
+
+        return saveParticipant(participantModel);
+    }
 }
