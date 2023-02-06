@@ -1,5 +1,5 @@
 insert into participant_details(id, name, email, wish_list)
-values(1, 'chris', 'chris08tm@gmail.com', 'empty');
+values(1, 'chris', 'chris@gmail.com', 'empty');
 
 insert into participant_details(id, name, email, wish_list)
 values(2, 'yoandy', 'yoandy@gmail.com', 'empty');
